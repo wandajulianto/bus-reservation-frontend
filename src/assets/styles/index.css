@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+body {
+  @apply bg-neo-white text-neo-black font-sans;
+}
+
+
+.neo-button {
+  @apply bg-neo-white border-3 border-neo-black shadow-neo active:translate-x-[4px] active:translate-y-[4px] active:shadow-none;
+}
