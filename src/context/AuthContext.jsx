@@ -1,80 +1,116 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import authService from '../services/authService';
+import React, { createContext, useContext, useReducer, useEffect } from 'react';
 
 
-const AuthContext = createContext(null);
+// Initial state
+const initialState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null
+};
 
 
+// Reducer function
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return {
+        ...state,
+        isLoading: true,
+        error: null
+      };
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        user: action.payload.user,
+        token: action.payload.token,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null
+      };
+    case 'LOGIN_FAILURE':
+      return {
+        ...state,
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: action.payload
+      };
+    case 'LOGOUT':
+      return {
+        ...initialState
+      };
+    default:
+      return state;
+  }
+};
+
+
+// Create Context
+const AuthContext = createContext();
+
+
+// Provider Component
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [state, dispatch] = useReducer(authReducer, initialState);
 
 
+  // Persist login state
   useEffect(() => {
-    // Cek autentikasi saat komponen dimuat
-    const token = authService.getToken();
-    const savedUser = authService.getCurrentUser();
+    const token = localStorage.getItem('token');
+    const userString = localStorage.getItem('user');
 
 
-    if (token && savedUser) {
-      setUser(savedUser);
-      setIsAuthenticated(true);
+    if (token && userString) {
+      try {
+        const user = JSON.parse(userString);
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: { user, token }
+        });
+      } catch (error) {
+        // Clear invalid stored data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
-    setIsLoading(false);
   }, []);
 
 
-  const login = async (email, password) => {
-    try {
-      const userData = await authService.login(email, password);
-      setUser(userData.user);
-      setIsAuthenticated(true);
-      return userData;
-    } catch (error) {
-      setIsAuthenticated(false);
-      throw error;
+  // Effect to handle token and user storage
+  useEffect(() => {
+    if (state.token) {
+      localStorage.setItem('token', state.token);
+    } else {
+      localStorage.removeItem('token');
     }
-  };
 
 
-  const register = async (userData) => {
-    try {
-      const response = await authService.register(userData);
-      return response;
-    } catch (error) {
-      throw error;
+    if (state.user) {
+      localStorage.setItem('user', JSON.stringify(state.user));
+    } else {
+      localStorage.removeItem('user');
     }
-  };
-
-
-  const logout = () => {
-    authService.logout();
-    setUser(null);
-    setIsAuthenticated(false);
-  };
+  }, [state.token, state.user]);
 
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isAuthenticated,
-      isLoading,
-      login,
-      register,
-      logout
-    }}>
-      {!isLoading && children}
+    <AuthContext.Provider value={{ state, dispatch }}>
+      {children}
     </AuthContext.Provider>
   );
 };
 
 
-// Custom hook untuk menggunakan AuthContext
+// Custom hook for using auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === null) {
+  
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
+  
   return context;
 };

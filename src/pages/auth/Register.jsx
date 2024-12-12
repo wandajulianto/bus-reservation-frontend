@@ -140,8 +140,96 @@ const Register = () => {
           </div>
 
 
-          {/* Email dan Password Input serupa dengan Register */}
-          {/* ... (tambahkan input email, password, confirm password) */}
+          {/* Email Input */}
+          <div className="mb-4">
+            <label htmlFor="email" className="block mb-2 font-bold">
+              Email
+            </label>
+            <input 
+              type="email"
+              id="email"
+              value={formData.email}
+              onChange={(e) => setFormData(prev => ({
+                ...prev, 
+                email: e.target.value
+              }))}
+              className={`w-full px-3 py-2 border-3 ${
+                errors.email 
+                  ? 'border-red-500 bg-red-50' 
+                  : 'border-neo-black bg-neo-white'
+              }`}
+              placeholder="Enter your email"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.email}
+              </p>
+            )}
+          </div>
+
+
+          {/* Password Input */}
+          <div className="mb-4">
+            <label htmlFor="password" className="block mb-2 font-bold">
+              Password
+            </label>
+            <input 
+              type="password"
+              id="password"
+              value={formData.password}
+              onChange={(e) => setFormData(prev => ({
+                ...prev, 
+                password: e.target.value
+              }))}
+              className={`w-full px-3 py-2 border-3 ${
+                errors.password 
+                  ? 'border-red-500 bg-red-50' 
+                  : 'border-neo-black bg-neo-white'
+              }`}
+              placeholder="Enter your password"
+            />
+            {errors.password && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.password}
+              </p>
+            )}
+          </div>
+
+
+          {/* Confirm Password Input */}
+          <div className="mb-4">
+            <label htmlFor="confirmPassword" className="block mb-2 font-bold">
+              Confirm Password
+            </label>
+            <input 
+              type="password"
+              id="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={(e) => setFormData(prev => ({
+                ...prev, 
+                confirmPassword: e.target.value
+              }))}
+              className={`w-full px-3 py-2 border-3 ${
+                errors.confirmPassword 
+                  ? 'border-red-500 bg-red-50' 
+                  : 'border-neo-black bg-neo-white'
+              }`}
+              placeholder="Confirm your password"
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.confirmPassword}
+              </p>
+            )}
+          </div>
+
+
+          {/* Global Error Message */}
+          {errors.submit && (
+            <div className="mb-4 p-3 bg-red-100 border-3 border-red-500 text-red-700 rounded">
+              {errors.submit}
+            </div>
+          )}
 
 
           <Button 
